@@ -12,7 +12,7 @@ export class UserService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const hashedPassword = await bcrypt.hash(createUserDto.password, process.env.SALT_ROUNDS);
+      const hashedPassword = await bcrypt.hash(createUserDto.password, Number(process.env.SALT_ROUNDS));
 
       const createdUser = await this.prismaService.user.create({
         data: {
@@ -44,6 +44,7 @@ export class UserService {
 
       allPrismaUsers.forEach((user) => {
         const newUser = new User();
+        newUser.id = user.id;
         newUser.name = user.name;
         newUser.email = user.email;
         newUser.createdAt = user.createdAt;
