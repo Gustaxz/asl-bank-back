@@ -30,10 +30,17 @@ export class UserService {
       newUser.updatedAt = createdUser.updatedAt;
       newUser.balance = createdUser.balance;
 
-      return newUser;
+      return {
+        message: 'User created successfully',
+        statusCode: 201,
+        user: newUser,
+      };
     } catch (error) {
       console.log(error);
-      return new Error('Error creating user');
+      return {
+        message: 'Error creating user',
+        statusCode: 500,
+      };
     }
   }
 

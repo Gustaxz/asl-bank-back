@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreateTransactionDTO } from './dto/createTransaction.dto';
 import { TransactionService } from './transaction.service';
 
@@ -13,7 +13,7 @@ export class TransactionController {
   }
 
   @Get(':userId')
-  findHistoryByUserId(userId: string) {
+  findHistoryByUserId(@Param("userId") userId: string) {
     return this.transactionService.findHistoryByUserId(userId);
   }
 }

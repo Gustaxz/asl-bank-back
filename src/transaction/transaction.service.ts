@@ -10,6 +10,26 @@ export class TransactionService {
 
     async createTransaction(amount: number, senderId: string, recieverId?: string) {
         try {
+            const userAmount = await this.prismaService.user.findUnique({
+                where: {
+                    id: senderId,
+                },
+            })
+
+            if (!userAmount) {
+                return {
+                    message: 'User not found',
+                    statusCode: 404,
+                };
+            }
+
+            if (userAmount.balance < amount) {
+                return {
+                    message: 'Insufficient balance',
+                    statusCode: 400,
+                };
+            }
+
             const [newHistory, userWithNewBalance] = await this.prismaService.$transaction([
                 this.prismaService.history.create({
                     data: {
@@ -48,10 +68,13 @@ export class TransactionService {
 
 
     async findHistoryByUserId(userId: string) {
+        console.log({ userId });
         try {
             const history = await this.prismaService.history.findMany({
                 where: {
-                    userId,
+                    userId: {
+                        equals: userId,
+                    }
                 },
             });
 
