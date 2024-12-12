@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -56,7 +56,7 @@ export class UserService {
       return allUsers;
     } catch (error) {
       console.log(error);
-      return new Error('Error fetching users');
+      return new HttpException('Error fetching users', 500);
     }
   }
 
@@ -102,6 +102,35 @@ export class UserService {
     } catch (error) {
       console.log(error);
       return new Error('Error deleting user');
+    }
+  }
+
+  async comparePassword(email: string, password: string) {
+    try {
+      const user = await this.prismaService.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      const passwordIsValid = await bcrypt.compare(password, user.password);
+      if (!passwordIsValid) {
+        throw new HttpException('Invalid password', 401);
+      }
+
+      const newUser = new User();
+      newUser.name = user.name;
+      newUser.email = user.email;
+      newUser.createdAt = user.createdAt;
+      newUser.updatedAt = user.updatedAt;
+      newUser.balance = user.balance;
+      newUser.id = user.id;
+
+      return newUser;
+
+    } catch (error) {
+      console.log(error);
+      return new Error('Error fetching user password');
     }
   }
 }
