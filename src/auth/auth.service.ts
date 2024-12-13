@@ -12,7 +12,6 @@ export class AuthService {
     ): Promise<{ access_token: string, message?: string, statusCode?: number } | Error> {
         const user = await this.usersService.comparePassword(email, pass);
         if (user instanceof HttpException || user instanceof Error) {
-            console.log(user);
             return {
                 access_token: null,
                 message: 'Invalid credentials',

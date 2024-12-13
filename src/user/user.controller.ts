@@ -22,7 +22,6 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get('me')
   findOne(@Request() req) {
-    console.log("userId", req.userId);
     return this.userService.findOne(req.userId);
   }
 

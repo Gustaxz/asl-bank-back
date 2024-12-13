@@ -68,7 +68,6 @@ export class TransactionService {
 
 
     async findHistoryByUserId(userId: string) {
-        console.log({ userId });
         try {
             const history = await this.prismaService.history.findMany({
                 where: {
