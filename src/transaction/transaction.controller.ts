@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/auth/auth.guard';
 import { CreateTransactionDTO } from './dto/createTransaction.dto';
 import { TransactionService } from './transaction.service';
 
@@ -7,13 +8,15 @@ export class TransactionController {
   constructor(private readonly transactionService: TransactionService) { }
 
 
+  @UseGuards(AuthGuard)
   @Post()
-  createTransaction(@Body() createTransactionDto: CreateTransactionDTO) {
-    return this.transactionService.createTransaction(createTransactionDto.amount, createTransactionDto.senderId, createTransactionDto.recieverId);
+  createTransaction(@Request() req, @Body() createTransactionDto: CreateTransactionDTO) {
+    return this.transactionService.createTransaction(createTransactionDto.amount, req.userId, createTransactionDto.recieverId);
   }
 
-  @Get(':userId')
-  findHistoryByUserId(@Param("userId") userId: string) {
-    return this.transactionService.findHistoryByUserId(userId);
+  @UseGuards(AuthGuard)
+  @Get()
+  findHistoryByUserId(@Request() req) {
+    return this.transactionService.findHistoryByUserId(req.userId);
   }
 }
