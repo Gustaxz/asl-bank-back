@@ -1,4 +1,5 @@
 import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -31,14 +32,24 @@ export class UserService {
       newUser.balance = createdUser.balance;
 
       return {
-        message: 'User created successfully',
+        message: 'Usuário criado com sucesso',
         statusCode: 201,
         user: newUser,
       };
     } catch (error) {
       console.log(error);
+
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          return {
+            message: 'Essa conta de email já está em uso',
+            statusCode: 409,
+          };
+        }
+      }
+
       return {
-        message: 'Error creating user',
+        message: 'Error ao criar usuário',
         statusCode: 500,
       };
     }
@@ -63,7 +74,7 @@ export class UserService {
       return allUsers;
     } catch (error) {
       console.log(error);
-      return new HttpException('Error fetching users', 500);
+      return new HttpException('Error ao buscar usuários', 500);
     }
   }
 
@@ -76,7 +87,7 @@ export class UserService {
       })
 
       if (!foundUser) {
-        return new NotFoundException(`User with id ${id} not found`);
+        return new NotFoundException(`Usuário com id ${id} não encontrado`);
       }
 
       const newUser = new User();
@@ -102,13 +113,13 @@ export class UserService {
       });
 
       if (!deletedUser) {
-        return new NotFoundException(`User with id ${id} not found`);
+        return new NotFoundException(`Usuário com id ${id} não encontrado`);
       }
 
       return deletedUser;
     } catch (error) {
       console.log(error);
-      return new Error('Error deleting user');
+      return new Error('Erro excluindo usuário');
     }
   }
 
@@ -122,7 +133,7 @@ export class UserService {
 
       const passwordIsValid = await bcrypt.compare(password, user.password);
       if (!passwordIsValid) {
-        throw new HttpException('Invalid password', 401);
+        throw new HttpException('Senha inválida', 401);
       }
 
       const newUser = new User();
@@ -137,7 +148,7 @@ export class UserService {
 
     } catch (error) {
       console.log(error);
-      return new Error('Error fetching user password');
+      return new Error('Erro buscando senha do usuário');
     }
   }
 
